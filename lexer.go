@@ -109,6 +109,8 @@ func TokenizeKeywords(input string) (Token, error, int) {
 			return Token{Type: 'T', Value: result}, nil, len(result) - 1
 		case "f32":
 			return Token{Type: 'T', Value: result}, nil, len(result) - 1
+		case "void":
+			return Token{Type: 'T', Value: result}, nil, len(result) - 1
 		case "->":
 			return Token{Type: 'r', Value: result}, nil, len(result) - 1
 		case "return":
