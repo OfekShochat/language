@@ -126,8 +126,12 @@ func GetExpressionLength(tokens []Token) int {
 }
 
 func ParseNumberExpressions(tokens []Token) (Node, error, int) {
-	if len(tokens) == 1 && tokens[0].Type == 'n' {
-		return Node{Value: tokens[0].Value, Type: "Number"}, nil, 1
+	if len(tokens) == 1 {
+		if tokens[0].Type == 'n' {
+			return Node{Value: tokens[0].Value, Type: "Number"}, nil, 1
+		} else if tokens[0].Type == 'N' {
+			return Node{Value: tokens[0].Value, Type: "GetVariable"}, nil, 1
+		}
 	}
 	f := Node{}
 	switch tokens[1].Value {
@@ -142,7 +146,11 @@ func ParseNumberExpressions(tokens []Token) (Node, error, int) {
 	}
 	f.Type = "ConstantMathExpression"
 
-	f.Params = append(f.Params, Node{Value: tokens[0].Value, Type: "Number"})
+	if tokens[0].Type == 'n' {
+		f.Params = append(f.Params, Node{Value: tokens[0].Value, Type: "Number"})
+	} else if tokens[0].Type == 'N' {
+		f.Params = append(f.Params, Node{Value: tokens[0].Value, Type: "GetVariable"})
+	}
 	i := 2
 	for ; i < len(tokens); i++ {
 		node, _, n := ParseNumberExpressions(tokens[i:])
@@ -183,15 +191,12 @@ func ParseKeywords(tokens []Token) (Node, FunctionDeclaration, error, int) {
 }
 
 func ParseExpression(tokens []Token) (Node, error, int) {
-	// TODO(ghostway): make this use `ParseExpression()` when encountering a variable name.
-	if tokens[0].Type == 'n' {
-		node, err, n := ParseNumberExpressions(tokens)
+	if tokens[0].Type == 'n' || tokens[0].Type == 'N' {
+		node, err, n := ParseNumberExpressions(tokens[:GetExpressionLength(tokens)])
 		if err != nil {
 			panic(err)
 		}
 		return node, err, n
-	} else if tokens[0].Type == 'N' {
-		return Node{Type: "GetVariable", Value: tokens[0].Value}, nil, len(tokens[0].Value)
 	}
 	return Node{}, fmt.Errorf("Didn't find expression in %s", GetTokenString(tokens[0:1])), -1
 }
@@ -199,7 +204,6 @@ func ParseExpression(tokens []Token) (Node, error, int) {
 func Parse(tokens []Token) ([]Node, []FunctionDeclaration) {
 	var result []Node
 	var functions []FunctionDeclaration
-	fmt.Println(tokens)
 	for i := 0; i < len(tokens); i++ {
 		node, function, err, n := ParseKeywords(tokens[i:])
 		if err == nil {
