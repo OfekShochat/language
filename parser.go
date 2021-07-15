@@ -79,7 +79,7 @@ func ParseFunction(tokens []Token) (FunctionDeclaration, int) {
 			if tokens[i+1].Type == 'l' {
 				offset = 2
 			}
-			a, _ := Parse(tokens[i+offset : i+length]) // TODO(ghostway): make Parse() also parse Variable Names.
+			a, _ := Parse(tokens[i+offset : i+length])
 			f.Body = a
 		} else if tokens[i].Value == "->" {
 			f.Returns = tokens[i+1].Value
@@ -144,7 +144,7 @@ func ParseNumberExpressions(tokens []Token) (Node, error, int) {
 	default:
 		return Node{}, fmt.Errorf("Syntax Error Token String '%s' String '%s %s'", GetTokenString(tokens[0:2]), tokens[0].Value, tokens[1].Value), -1
 	}
-	f.Type = "ConstantMathExpression"
+	f.Type = "ConstantMathExpression" // TODO(ghostway): check if its really a constant expression
 
 	if tokens[0].Type == 'n' {
 		f.Params = append(f.Params, Node{Value: tokens[0].Value, Type: "Number"})
