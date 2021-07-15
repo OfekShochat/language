@@ -79,6 +79,8 @@ func TokenizeChar(input string) (Token, error) {
 		return Token{Type: 'c', Value: "-"}, nil
 	case '*':
 		return Token{Type: 'c', Value: "*"}, nil
+	case '/':
+		return Token{Type: 'c', Value: "/"}, nil
 	case '{':
 		return Token{Type: 'c', Value: "{"}, nil
 	case '}':

@@ -141,6 +141,8 @@ func ParseNumberExpressions(tokens []Token) (Node, error, int) {
 		f.Value = "sub"
 	case "*":
 		f.Value = "mul"
+	case "/":
+		f.Value = "div"
 	default:
 		return Node{}, fmt.Errorf("Syntax Error Token String '%s' String '%s %s'", GetTokenString(tokens[0:2]), tokens[0].Value, tokens[1].Value), -1
 	}
