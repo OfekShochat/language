@@ -100,7 +100,7 @@ func GetTokenString(tokens []Token) string {
 }
 
 func ParseNumberExpressions(tokens []Token) (Node, error, int) {
-	if len(tokens) == 1 {
+	if len(tokens) == 1 && tokens[0].Type == 'n' {
 		return Node{Value: tokens[0].Value, Type: "Number"}, nil, 1
 	}
 	f := Node{}
