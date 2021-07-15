@@ -8,7 +8,7 @@ import (
 )
 
 func ReadFile(file_name string) string {
-	dat, err := ioutil.ReadFile("file.g")
+	dat, err := ioutil.ReadFile(file_name)
 	if err != nil {
 		fmt.Println(err)
 		return ""
