@@ -16,7 +16,7 @@ type Param struct {
 	Value string
 }
 
-type FunctionDecleration struct {
+type FunctionDeclaration struct {
 	Name    string
 	Params  []Param
 	Body    []Node
@@ -61,8 +61,8 @@ func GetFunctionBodyLength(tokens []Token) (int, error) {
 	return -1, fmt.Errorf("Didn't find end of function")
 }
 
-func ParseFunction(tokens []Token) (FunctionDecleration, int) {
-	f := FunctionDecleration{}
+func ParseFunction(tokens []Token) (FunctionDeclaration, int) {
+	f := FunctionDeclaration{}
 	f.Name = tokens[0].Value
 	i := 1
 	for ; i < len(tokens); i++ {
@@ -75,7 +75,11 @@ func ParseFunction(tokens []Token) (FunctionDecleration, int) {
 			if err != nil {
 				fmt.Println(err)
 			}
-			a, _ := Parse(tokens[i : i+length]) // TODO(ghostway): make Parse() also parse Variable Names.
+			offset := 1
+			if tokens[i+1].Type == 'l' {
+				offset = 2
+			}
+			a, _ := Parse(tokens[i+offset : i+length]) // TODO(ghostway): make Parse() also parse Variable Names.
 			f.Body = a
 		} else if tokens[i].Value == "->" {
 			f.Returns = tokens[i+1].Value
@@ -99,6 +103,28 @@ func GetTokenString(tokens []Token) string {
 	return result_string[:len(result_string)-1]
 }
 
+func GetExpressionLength(tokens []Token) int {
+	i := 0
+	used_paren := false
+	for ; i < len(tokens); i++ {
+		if tokens[i].Value == "(" {
+			used_paren = true
+		} else if tokens[i].Type == 'l' {
+			if used_paren {
+				continue
+			} else {
+				break
+			}
+		} else if tokens[i].Value == ")" {
+			break
+		}
+	}
+	if used_paren {
+		return i - 1
+	}
+	return i
+}
+
 func ParseNumberExpressions(tokens []Token) (Node, error, int) {
 	if len(tokens) == 1 && tokens[0].Type == 'n' {
 		return Node{Value: tokens[0].Value, Type: "Number"}, nil, 1
@@ -112,7 +138,7 @@ func ParseNumberExpressions(tokens []Token) (Node, error, int) {
 	case "*":
 		f.Value = "mul"
 	default:
-		return Node{}, fmt.Errorf("Syntax Error '%s' '%s %s'", GetTokenString(tokens[0:2]), tokens[0].Value, tokens[1].Value), -1
+		return Node{}, fmt.Errorf("Syntax Error Token String '%s' String '%s %s'", GetTokenString(tokens[0:2]), tokens[0].Value, tokens[1].Value), -1
 	}
 	f.Type = "ConstantMathExpression"
 
@@ -128,7 +154,16 @@ func ParseNumberExpressions(tokens []Token) (Node, error, int) {
 	return f, nil, i
 }
 
-func ParseKeywords(tokens []Token) (Node, FunctionDecleration, error, int) {
+func ParseVariable(tokens []Token) (Node, error, int) {
+	v := Node{}
+	v.Type = "VariableDeclaration"
+	v.Value = tokens[0].Value
+	params, err, n := ParseExpression(tokens[3 : 3+GetExpressionLength(tokens[3:])])
+	v.Params = append(v.Params, params)
+	return v, err, n + 3
+}
+
+func ParseKeywords(tokens []Token) (Node, FunctionDeclaration, error, int) {
 	if tokens[0].Type == 'F' {
 		f, n := ParseFunction(tokens[1:])
 		return Node{}, f, nil, n
@@ -136,12 +171,19 @@ func ParseKeywords(tokens []Token) (Node, FunctionDecleration, error, int) {
 		node, err, n := ParseExpression(tokens[1:])
 		returns_node := Node{Type: "Keyword", Value: "Returns"}
 		returns_node.Params = append(returns_node.Params, node)
-		return returns_node, FunctionDecleration{}, err, n
+		return returns_node, FunctionDeclaration{}, err, n
+	} else if tokens[0].Type == 'T' {
+		node, err, n := ParseVariable(tokens)
+		if err != nil {
+			panic(err)
+		}
+		return node, FunctionDeclaration{}, nil, n
 	}
-	return Node{}, FunctionDecleration{}, fmt.Errorf("Didn't find any keywords in %s", GetTokenString(tokens[0:1])), -1
+	return Node{}, FunctionDeclaration{}, fmt.Errorf("Didn't find any keywords in %s", GetTokenString(tokens[0:1])), -1
 }
 
 func ParseExpression(tokens []Token) (Node, error, int) {
+	// TODO(ghostway): make this use `ParseExpression()` when encountering a variable name.
 	if tokens[0].Type == 'n' {
 		node, err, n := ParseNumberExpressions(tokens)
 		if err != nil {
@@ -152,9 +194,9 @@ func ParseExpression(tokens []Token) (Node, error, int) {
 	return Node{}, fmt.Errorf("Didn't find expression in %s", GetTokenString(tokens[0:1])), -1
 }
 
-func Parse(tokens []Token) ([]Node, []FunctionDecleration) {
+func Parse(tokens []Token) ([]Node, []FunctionDeclaration) {
 	var result []Node
-	var functions []FunctionDecleration
+	var functions []FunctionDeclaration
 	for i := 0; i < len(tokens); i++ {
 		node, function, err, n := ParseKeywords(tokens[i:])
 		if err == nil {
@@ -172,6 +214,11 @@ func Parse(tokens []Token) ([]Node, []FunctionDecleration) {
 			i += n
 			continue
 		}
+		if tokens[i].Type == 'l' {
+			i++
+			continue
+		}
+		panic(fmt.Sprintf("unexpected token type %s (%s)", string(tokens[i].Type), tokens[i].Value))
 	}
 	return result, functions
 }

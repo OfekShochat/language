@@ -89,6 +89,8 @@ func TokenizeChar(input string) (Token, error) {
 		return Token{Type: 'l', Value: "\n"}, nil
 	case ';':
 		return Token{Type: 'l', Value: ";"}, nil
+	case '=':
+		return Token{Type: 'e', Value: "="}, nil
 	default:
 		return Token{Type: 'u', Value: ""}, fmt.Errorf("Couldn't tokenize Char from: %s", string(input[0]))
 	}
@@ -111,6 +113,8 @@ func TokenizeKeywords(input string) (Token, error, int) {
 			return Token{Type: 'r', Value: result}, nil, len(result) - 1
 		case "return":
 			return Token{Type: 'R', Value: result}, nil, len(result) - 1
+		case "==":
+			return Token{Type: 'E', Value: result}, nil, len(result) - 1
 		}
 	}
 	return Token{Type: 'u', Value: ""}, fmt.Errorf("Couldn't tokenize any Keywords from: %s", string(input[0])), -1
