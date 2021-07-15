@@ -190,6 +190,8 @@ func ParseExpression(tokens []Token) (Node, error, int) {
 			panic(err)
 		}
 		return node, err, n
+	} else if tokens[0].Type == 'N' {
+		return Node{Type: "GetVariable", Value: tokens[0].Value}, nil, len(tokens[0].Value)
 	}
 	return Node{}, fmt.Errorf("Didn't find expression in %s", GetTokenString(tokens[0:1])), -1
 }
@@ -197,6 +199,7 @@ func ParseExpression(tokens []Token) (Node, error, int) {
 func Parse(tokens []Token) ([]Node, []FunctionDeclaration) {
 	var result []Node
 	var functions []FunctionDeclaration
+	fmt.Println(tokens)
 	for i := 0; i < len(tokens); i++ {
 		node, function, err, n := ParseKeywords(tokens[i:])
 		if err == nil {
