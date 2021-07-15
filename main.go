@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"os"
 	"time"
 )
 
@@ -21,11 +22,13 @@ func ReadFile(file_name string) string {
 }
 
 func main() {
-	//var i32 = types.I32
-
+	programName := "file.g"
+	if len(os.Args) > 1 {
+		programName = os.Args[1]
+	}
 	start := time.Now()
 
-	s := ReadFile("file.g")
+	s := ReadFile(programName)
 
 	out, err := Tokenize(s) //Tokenize("func f(i32 a, i32 b) -> i32 {\n  return 3 * 4\n}") //"func f(i32 a, i32 b) -> i32 {\n  return a * b\n}") // 1 + 2 - 3 + 1
 	if err != nil {
