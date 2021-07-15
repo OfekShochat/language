@@ -105,6 +105,8 @@ func TokenizeKeywords(input string) (Token, error, int) {
 		switch result {
 		case "func":
 			return Token{Type: 'F', Value: result}, nil, len(result) - 1
+		case "comptime":
+			return Token{Type: 't', Value: result}, nil, len(result) - 1
 		case "i32":
 			return Token{Type: 'T', Value: result}, nil, len(result) - 1
 		case "i64":

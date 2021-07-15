@@ -125,6 +125,13 @@ func GetExpressionLength(tokens []Token) int {
 	return i
 }
 
+func GetExpressionType(node Node) string {
+	for i := 0; i < len(node.Params); i++ {
+
+	}
+	return "ConstantMathExpression"
+}
+
 func ParseNumberExpressions(tokens []Token) (Node, error, int) {
 	if len(tokens) == 1 {
 		if tokens[0].Type == 'n' {
@@ -146,7 +153,7 @@ func ParseNumberExpressions(tokens []Token) (Node, error, int) {
 	default:
 		return Node{}, fmt.Errorf("Syntax Error Token String '%s' String '%s %s'", GetTokenString(tokens[0:2]), tokens[0].Value, tokens[1].Value), -1
 	}
-	f.Type = "ConstantMathExpression" // TODO(ghostway): check if its really a constant expression
+	//f.Type = "ConstantMathExpression" // TODO(ghostway): check if its really a compile time expression
 
 	if tokens[0].Type == 'n' {
 		f.Params = append(f.Params, Node{Value: tokens[0].Value, Type: "Number"})
@@ -161,16 +168,28 @@ func ParseNumberExpressions(tokens []Token) (Node, error, int) {
 		f.Params = append(f.Params, node)
 		f.Params = append(f.Params)
 	}
+	f.Type = GetExpressionType(f)
 	return f, nil, i
 }
 
-func ParseVariable(tokens []Token) (Node, error, int) {
+func ParseVariable(tokens []Token, t byte) (Node, error, int) {
 	v := Node{}
-	v.Type = "VariableDeclaration"
-	v.Value = tokens[0].Value
-	params, err, n := ParseExpression(tokens[3 : 3+GetExpressionLength(tokens[3:])])
+	if t == 't' {
+		v.Type = "CompileTimeVariableDeclaration"
+	} else {
+		v.Type = "VariableDeclaration"
+	}
+	a := 3
+	if t == 't' {
+		v.Value = tokens[1].Value
+		a = 4
+	} else {
+		v.Value = tokens[0].Value
+
+	}
+	params, err, n := ParseExpression(tokens[a : a+GetExpressionLength(tokens[a:])])
 	v.Params = append(v.Params, params)
-	return v, err, n + 3
+	return v, err, n + a
 }
 
 func ParseKeywords(tokens []Token) (Node, FunctionDeclaration, error, int) {
@@ -182,8 +201,8 @@ func ParseKeywords(tokens []Token) (Node, FunctionDeclaration, error, int) {
 		returns_node := Node{Type: "Keyword", Value: "Returns"}
 		returns_node.Params = append(returns_node.Params, node)
 		return returns_node, FunctionDeclaration{}, err, n
-	} else if tokens[0].Type == 'T' {
-		node, err, n := ParseVariable(tokens)
+	} else if tokens[0].Type == 'T' || tokens[0].Type == 't' {
+		node, err, n := ParseVariable(tokens, tokens[0].Type)
 		if err != nil {
 			panic(err)
 		}
