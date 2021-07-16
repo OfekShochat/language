@@ -10,8 +10,7 @@ import (
 func ReadFile(file_name string) string {
 	dat, err := ioutil.ReadFile(file_name)
 	if err != nil {
-		fmt.Println(err)
-		return ""
+		panic(err)
 	}
 	for i := 0; i < len(dat); i++ {
 		if dat[i] == '\r' {
@@ -38,7 +37,8 @@ func main() {
 	/*for i := 0; i < len(out); i++ {
 		fmt.Printf("%s '%s'\n", string(out[i].Type), out[i].Value)
 	}*/
-	_, functions := Parse(out)
+	expressions, functions := Parse(out)
+	fmt.Println(expressions)
 	fmt.Println(functions)
 	elapsed := time.Since(start)
 	fmt.Println(float64(elapsed) / 1000000000)
