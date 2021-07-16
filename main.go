@@ -38,9 +38,9 @@ func main() {
 		fmt.Printf("%s '%s'\n", string(out[i].Type), out[i].Value)
 	}*/
 	expressions, functions := Parse(out)
+	elapsed := time.Since(start)
 	fmt.Println(expressions)
 	fmt.Println(functions)
-	elapsed := time.Since(start)
 	fmt.Println(float64(elapsed) / 1000000000)
 	//fmt.Printf("%v\n", expressions[0])
 	/*a, err := constant.NewIntFromString(i32, o[0].Params[1].Value)
