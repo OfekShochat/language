@@ -85,8 +85,6 @@ func ParseFunction(tokens []Token) (FunctionDeclaration, int) {
 			f.Returns = tokens[i+1].Value
 		}
 	}
-	//p := Param{Name: tokens[3].Value, Type: tokens[2].Value}
-	//f.Params = append(f.Params, p)
 
 	return f, i
 }
@@ -228,7 +226,7 @@ func Parse(tokens []Token) ([]Node, []FunctionDeclaration) {
 	for i := 0; i < len(tokens); i++ {
 		node, function, err, n := ParseKeywords(tokens[i:])
 		if err == nil {
-			i += n
+			i += n + 1
 			if node.Type == "" {
 				functions = append(functions, function)
 			} else {

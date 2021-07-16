@@ -33,9 +33,6 @@ func TokenizeNumber(input string) (Token, error, int) {
 	if result == "" {
 		return Token{Type: 'u', Value: ""}, fmt.Errorf("Couldn't parse Number from: %s", input), -1
 	}
-	/*if i < len(input) {
-		return [Token{Type: 'n', Value: result}, Token{Type: 'u', Value: input[i:]}]
-	}*/
 
 	return Token{Type: 'n', Value: result}, nil, len(result)
 }
@@ -55,7 +52,7 @@ func TokenizeString(input string) (Token, error, int) {
 	if !closed {
 		return Token{Type: 'u', Value: ""}, fmt.Errorf("Couldn't parse String from: %s", input), 0
 	}
-	return Token{Type: 's', Value: value}, nil, len(value)
+	return Token{Type: 's', Value: value}, nil, len(value) + 1
 }
 
 func SkipWhiteSpace(input string) int {
@@ -105,7 +102,7 @@ func TokenizeKeywords(input string) (Token, error, int) {
 		switch result {
 		case "func":
 			return Token{Type: 'F', Value: result}, nil, len(result) - 1
-		case "comptime":
+		case "#":
 			return Token{Type: 't', Value: result}, nil, len(result) - 1
 		case "i32":
 			return Token{Type: 'T', Value: result}, nil, len(result) - 1
@@ -121,6 +118,10 @@ func TokenizeKeywords(input string) (Token, error, int) {
 			return Token{Type: 'R', Value: result}, nil, len(result) - 1
 		case "==":
 			return Token{Type: 'E', Value: result}, nil, len(result) - 1
+		case "use":
+			return Token{Type: 'U', Value: result}, nil, len(result) - 1
+		case "::":
+			return Token{Type: 'i', Value: result}, nil, len(result) - 1
 		}
 	}
 	return Token{Type: 'u', Value: ""}, fmt.Errorf("Couldn't tokenize any Keywords from: %s", string(input[0])), -1
